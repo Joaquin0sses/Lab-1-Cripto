@@ -19,7 +19,7 @@ def cifrar_cesar(texto, corrimiento):
 
     return texto_cifrado
 
-# Ejemplo de uso aqui
+# Ejemplo de uso aqui ahora
 texto = input("Introduce el texto a cifrar: ")
 corrimiento = int(input("Introduce el corrimiento: "))
 
