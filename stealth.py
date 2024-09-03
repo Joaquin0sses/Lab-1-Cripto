@@ -1,38 +1,29 @@
 from scapy.all import *
 import time
 
-# Función para enviar caracteres cifrados en paquetes ICMP
-def enviar_datos_icmp(destino, texto_cifrado):
-    for char in texto_cifrado:
-        paquete = IP(dst=destino)/ICMP()/Raw(load=char)
-        send(paquete)
-        time.sleep(1)  # Espera para no enviar todos los paquetes demasiado rápido
+def send_icmp_data(destination_ip, data, interval=0.1):
+    packet_id = 12345  # ID fijo para todos los paquetes
+    seq_number = 1  # Número de secuencia inicial
 
-# Mostrar un ping real previo al envío de datos
-def ping_real(destino):
-    ping_result = sr1(IP(dst=destino)/ICMP(), timeout=1)
-    print("Ping real previo:")
-    ping_result.show()
-
-# Mostrar un ping real posterior al envío de datos
-def ping_real_post(destino):
-    ping_result = sr1(IP(dst=destino)/ICMP(), timeout=1)
-    print("Ping real posterior:")
-    ping_result.show()
+    for char in data:
+        # Crear paquete ICMP con el carácter en el campo de datos
+        packet = IP(dst=destination_ip)/ICMP(id=packet_id, seq=seq_number)/Raw(load=char)
+        
+        # Enviar el paquete
+        send(packet, verbose=0)
+        
+        print(f"Sent 1 packets.")
+        
+        # Incrementar el número de secuencia para el siguiente paquete
+        seq_number += 1
+        packet_id += 1
+        
+        # Esperar antes de enviar el siguiente paquete para mantener el timestamp coherente
+        time.sleep(interval)
 
 # Ejemplo de uso
-destino = "172.17.0.1"  # Puedes cambiar esto por la IP de destino
-texto = input("Introduce el texto cifrado:")
+data = input("Introduce el texto cifrado:") # Datos a enviar
 
-# Cifrado del texto
-texto_cifrado =texto
-print(f"Texto cifrado: {texto_cifrado}")
-
-# Ping real previo
-ping_real(destino)
-
-# Envío de datos cifrados en ICMP
-enviar_datos_icmp(destino, texto_cifrado)
-
-# Ping real posterior
-ping_real_post(destino)
+destination_ip = "192.168.31.188"  # IP de destino
+  
+send_icmp_data(destination_ip, data)
