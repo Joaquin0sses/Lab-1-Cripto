@@ -1,16 +1,19 @@
 from scapy.all import rdpcap, ICMP, Raw
 from termcolor import colored
 from langdetect import detect
-import re
+import struct
 
 def extract_icmp_data(pcap_file):
     packets = rdpcap(pcap_file)
     data = ''
 
     for packet in packets:
-        if ICMP in packet and packet[ICMP].type == 8:  # ICMP Echo Request
+        if ICMP in packet and packet[ICMP].type == 13:  # ICMP Timestamp Request
             if packet.haslayer(Raw):
-                data += packet[Raw].load.decode('latin1')  # Decodificar cada byte
+                raw_data = packet[Raw].load
+                # Ignorar los primeros 12 bytes que corresponden a los campos de timestamp (orig, recv, xmit)
+                extracted_char = raw_data[12:].decode('latin1')
+                data += extracted_char
 
     return data
 
@@ -45,7 +48,7 @@ def brute_force_caesar(text):
     return probable_message
 
 # Ejemplo de uso
-pcap_file = 'Trafico de paquetes ICMP.pcapng'  # Reemplaza con el nombre de tu archivo .pcapng
+pcap_file = 'Trafico de paquetes-ICMP.pcapng'  # Reemplaza con el nombre de tu archivo .pcapng
 icmp_data = extract_icmp_data(pcap_file)
 print(f"ICMP datos extraidos: {icmp_data}")
 
